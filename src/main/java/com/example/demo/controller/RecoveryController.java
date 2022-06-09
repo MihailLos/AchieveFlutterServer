@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.controller.request.RecoveryPasswordRequest;
 import com.example.demo.controller.response.SuccessfullResponse;
 import com.example.demo.entity.CodeReset;
 import com.example.demo.entity.User;
@@ -14,10 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 
@@ -120,13 +118,8 @@ public class RecoveryController {
     }
 
     @ApiOperation("Смена пароля для доступа к утерянному акаунту")
-    @PutMapping("/code/password/{password}/{email}/{role}")
-    public SuccessfullResponse resetCodePassword(@PathVariable
-                                                @ApiParam (value = "Новый пароль. Not null. Не менее 8 символов", example = "hfI86Ugw09")
-                                                        String password,
-                                            @PathVariable
-                                                @ApiParam (value = "Электронная почта, на которую зарегестрирован аккаунт. Not null.", example = "qwe123@gmail.com")
-                                                        String email,
+    @PutMapping("/code/password/{role}")
+    public SuccessfullResponse resetCodePassword(@RequestBody RecoveryPasswordRequest recoveryPasswordRequest,
                                             @PathVariable
                                                 @ApiParam (value = "Роль пользователя в системе. Not null.", example = "Admin", allowableValues = "Admin, Moderator, Dekanat")
                                                         String role) {
@@ -139,12 +132,12 @@ public class RecoveryController {
             roleNameForServer = "Деканат";
         else
             roleNameForServer = "Студент";
-        User user = userService.findByEmailAndRoleName(email, roleNameForServer);
-        if (user.getPasswordUser().equals(password))
+        User user = userService.findByEmailAndRoleName(recoveryPasswordRequest.getEmail(), roleNameForServer);
+        if (user.getPasswordUser().equals(recoveryPasswordRequest.getPassword()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Новый пароль не может совпадать с предыдущим");
-        if (password.length()<8)
+        if (recoveryPasswordRequest.getPassword().length()<8)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль должен состоять не менее чем из 8 символов");
-        user.setPasswordUser(password);
+        user.setPasswordUser(recoveryPasswordRequest.getPassword());
         userService.savePassword(user);
         return new SuccessfullResponse(HttpStatus.OK.value(), "Пароль успешно изменен");
     }
