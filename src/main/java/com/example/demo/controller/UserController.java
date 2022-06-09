@@ -69,6 +69,12 @@ public class UserController {
         return new SuccessfullResponse(HttpStatus.OK.value(), "Email успешно изменен");
     }
 
+    @ApiOperation("Статусы активности пользователей")
+    @GetMapping("upr/getUserStatusActives")
+    public List<StatusActiveUserView> getUserStatusActives() {
+        return userService.getAllStatusActives(StatusActiveUserView.class);
+    }
+
     @ApiOperation("Email авторизованного пользователя")
     @GetMapping("student/getEmail")
     public String getUserEmail() {
@@ -123,52 +129,9 @@ public class UserController {
         return new SuccessfullResponse(HttpStatus.OK.value(), "Модератору успешно изменен список институтов");
     }
 
-//    @ApiOperation("Удаление институтов у модератора для админа")
-//    @DeleteMapping("admin/deleteInstitutesFromModerator/{moderatorId}")
-//    public SuccessfullResponse deleteInstitutesFromModerator(
-//            @PathVariable int moderatorId,
-//            @RequestParam
-//            @ApiParam(value = "Список id удаляемых институтов. Not Null", example = "1,2,3")
-//                    Optional<List<Integer>> listOfInstitutesId
-//    ) throws MessagingException {
-//        //Проверяем есть ли модератор с таким id
-//        Moderator moderator = userService.getModerator(moderatorId, Moderator.class);
-//        User findUser = moderator.getUser();
-//        String userEmail = findUser.getEmailUser();
-//        MimeMessage notificationMessage = mailSender.createMimeMessage();
-//        MimeMessageHelper helper = new MimeMessageHelper(notificationMessage, true);
-//        helper.setTo(userEmail);
-//        helper.setSubject("Вас отвязали от некоторых институтов");
-//        String messageText = "";
-//
-//        if (moderator == null)
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Модератор с указанным id не найден");
-//
-//        if (listOfInstitutesId.isEmpty()) {
-//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Список институтов пуст!");
-//        }
-//
-//        Set<String> nameInstitutes = new HashSet<>();
-//        List<Integer> inputInstituteList = listOfInstitutesId.get();
-//        for (Integer instituteId : inputInstituteList) {
-//            Institute removableInstitute = educationService.getInstitute(instituteId);
-//            nameInstitutes.add(educationService.getInstitute(instituteId).getInstituteName());
-//            moderator.removeInstitute(removableInstitute);
-//        }
-//
-//        messageText += "Вы были отвязаны от следующих институтов: " + nameInstitutes;
-//
-//        userService.saveModer(moderator);
-//
-//        helper.setText(messageText);
-//        mailSender.send(notificationMessage);
-//        return new SuccessfullResponse(HttpStatus.OK.value(), "Институты успешно удалены");
-//    }
-
-
     @ApiOperation("Список пользователей (по роли или всех) - для админа")
     @GetMapping("admin/getUsers")
-    public List <UsersView> getUsers(@RequestParam
+    public List<UsersView> getUsers(@RequestParam
                                          @ApiParam(value = "Id роли пользователя. Фильтр, может не передаваться. Если передается - Not null. [1,3]", example = "1")
                                                  Optional<Integer> roleId,
                                      @RequestParam
@@ -297,7 +260,7 @@ public class UserController {
 
     @ApiOperation("Список ролей для админа")
     @GetMapping ("/admin/getRoles")
-    public List<RoleView> getTypeOperation() {
+    public List<RoleView> getRoles() {
         return userService.getAllRoles(RoleView.class);
     }
 }
