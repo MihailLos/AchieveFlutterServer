@@ -1,9 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.controller.request.ChangeCategoryRequest;
-import com.example.demo.controller.request.CreationAchieveForAdminRequest;
-import com.example.demo.controller.request.CreationAchieveRequest;
-import com.example.demo.controller.request.CreationCategoryRequest;
+import com.example.demo.controller.request.*;
 import com.example.demo.controller.response.SuccessfullResponse;
 import com.example.demo.entity.*;
 import com.example.demo.view.*;
@@ -690,35 +687,7 @@ public class AchievementController {
             @PathVariable
             @ApiParam (value = "Id достижения. Not null. >0", example = "19", required = true)
                     int achieveId,
-            @RequestParam
-            @ApiParam(value = "Название достижения. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то Not null", example = "Братство кольца")
-                    Optional<String> achieveName,
-            @RequestParam
-            @ApiParam(value = "Описание достижения. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то Not null", example = "Выйти замуж/жениться во время учебы")
-                    Optional<String> achieveDescription,
-            @RequestParam
-            @ApiParam(value = "Баллы, начисляемые за выполнение достижения. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то Not null. >0", example = "15")
-                    Optional<Integer> achieveScore,
-            @RequestParam
-            @ApiParam(value = "Дата, начиная с которой можно получить достижение. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то Not null", example = "2021-05-04")
-            @DateTimeFormat(pattern = "yyyy-MM-dd")
-                    Optional<LocalDate> achieveStartDate,
-            @RequestParam
-            @ApiParam(value = "Дата, до которой можно получить достижение. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то может быть null", example = "2021-05-17")
-            @DateTimeFormat(pattern = "yyyy-MM-dd")
-                    Optional<LocalDate> achieveEndDate,
-            @RequestParam
-            @ApiParam(value = "Id награды за выполнение достижения. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то Not null. >0", example = "2")
-                    Optional<Integer> rewardId,
-            @RequestParam
-            @ApiParam(value = "Id категории достижения. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то Not null. >0", example = "4")
-                    Optional<Integer> categoryId,
-            @RequestParam
-            @ApiParam(value = "Изображние достижения в виде байт массива. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то Not null")
-                    Optional<byte[]> achieveDataFile,
-            @RequestParam
-            @ApiParam(value = "Формат изображния достижения. Может не передаваться, тогда это поле в достижении не будет изменено. Если передается, то Not null", example = "png")
-                    Optional<String> achieveFormatFile) throws MessagingException {
+            @RequestBody EditAchieveForAdminRequest editAchieveForAdminRequest) throws MessagingException {
 
         Achievement achievement = achieveService.getAchieveById(achieveId, Achievement.class);
         User findUser = achievement.getCreatorOfAchieve();
@@ -733,70 +702,76 @@ public class AchievementController {
         if (achievement==null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Достижение с указанным id не найдено");
 
-        if (achieveName.isPresent()) {
-            if (!achieveName.get().equals("") && !achieveName.get().equals(achievement.getNameAchieve()))
-                achievement.setNameAchieve(Character.toUpperCase(achieveName.get().charAt(0))+achieveName.get().substring(1).toLowerCase());
-            messageText += "Название достижения изменено на: " + achieveName + "\n";
+        if (editAchieveForAdminRequest.getAchieveName().isPresent()) {
+            if (!editAchieveForAdminRequest.getAchieveName().get().equals("") && !editAchieveForAdminRequest.getAchieveName().get().equals(achievement.getNameAchieve()))
+                achievement.setNameAchieve(Character.toUpperCase(editAchieveForAdminRequest.getAchieveName().get().charAt(0))+editAchieveForAdminRequest.getAchieveName().get().substring(1).toLowerCase());
+            messageText += "Название достижения изменено на: " + editAchieveForAdminRequest.getAchieveName() + "\n";
         }
 
-        if (achieveDescription.isPresent()) {
-            if (!achieveDescription.get().equals("") && !achieveDescription.get().equals(achievement.getDescriptionAchieve()))
-                achievement.setDescriptionAchieve(Character.toUpperCase(achieveDescription.get().charAt(0))+achieveDescription.get().substring(1).toLowerCase());
-            messageText += "Описание достижения изменено на: " + achieveDescription + "\n";
+        if (editAchieveForAdminRequest.getAchieveDescription().isPresent()) {
+            if (!editAchieveForAdminRequest.getAchieveDescription().get().equals("") && !editAchieveForAdminRequest.getAchieveDescription().get().equals(achievement.getDescriptionAchieve()))
+                achievement.setDescriptionAchieve(Character.toUpperCase(editAchieveForAdminRequest.getAchieveDescription().get().charAt(0))+editAchieveForAdminRequest.getAchieveDescription().get().substring(1).toLowerCase());
+            messageText += "Описание достижения изменено на: " + editAchieveForAdminRequest.getAchieveDescription() + "\n";
         }
 
-        if (achieveScore.isPresent()) {
-            if (achieveScore.get()!=0 && achievement.getScoreAchieve()!=achieveScore.get())
-                achievement.setScoreAchieve(achieveScore.get());
-            messageText += "Количество очков за достижение изменено на: " + achieveScore + "\n";
+        if (editAchieveForAdminRequest.getAchieveScore().isPresent()) {
+            if (editAchieveForAdminRequest.getAchieveScore().get()!=0 && achievement.getScoreAchieve()!=editAchieveForAdminRequest.getAchieveScore().get())
+                achievement.setScoreAchieve(editAchieveForAdminRequest.getAchieveScore().get());
+            messageText += "Количество очков за достижение изменено на: " + editAchieveForAdminRequest.getAchieveScore() + "\n";
         }
 
-        if (achieveStartDate.isPresent()) {
+        if (editAchieveForAdminRequest.getAchieveStartDate().isPresent()) {
             LocalDate nowDate = LocalDate.now();
-            if (achieveStartDate.get().isAfter(nowDate) && achieveStartDate.get().compareTo(achievement.getStartDateAchieve())!=0 ) {
-                achievement.setStartDateAchieve(achieveStartDate.get());
-                messageText += "Дата начала выполнения достижения изменена на: " + achieveStartDate + "\n";
+            if (editAchieveForAdminRequest.getAchieveStartDate().get().isAfter(nowDate) && editAchieveForAdminRequest.getAchieveStartDate().get().compareTo(achievement.getStartDateAchieve())!=0 ) {
+                achievement.setStartDateAchieve(editAchieveForAdminRequest.getAchieveStartDate().get());
+                messageText += "Дата начала выполнения достижения изменена на: " + editAchieveForAdminRequest.getAchieveStartDate() + "\n";
             }
             else
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата начала не должна быть раньше завтрашнего дня");
         }
 
-        if (achieveEndDate.isPresent() ) {
-            if (achieveEndDate.get().isAfter(achievement.getStartDateAchieve())) {
-                achievement.setEndDateAchieve(achieveEndDate.get());
-                messageText += "Дата окончания выполнения достижения изменена на: " + achieveEndDate + "\n";
+        if (editAchieveForAdminRequest.getAchieveEndDate().isPresent() ) {
+            if (editAchieveForAdminRequest.getAchieveEndDate().get().isAfter(achievement.getStartDateAchieve())) {
+                achievement.setEndDateAchieve(editAchieveForAdminRequest.getAchieveEndDate().get());
+                messageText += "Дата окончания выполнения достижения изменена на: " + editAchieveForAdminRequest.getAchieveEndDate() + "\n";
             }
             else
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата окончания не может быть раньше даты начала или равняться ей");
         }
 
-        if (rewardId.isPresent())
-            if (rewardId.get()!=0) {
-                achievement.setRewardOfAchieve(rewardService.getReward(rewardId.get()));
-                Reward reward = rewardService.getReward(rewardId.get());
+        if (editAchieveForAdminRequest.getRewardId().isPresent())
+            if (editAchieveForAdminRequest.getRewardId().get()!=0) {
+                achievement.setRewardOfAchieve(rewardService.getReward(editAchieveForAdminRequest.getRewardId().get()));
+                Reward reward = rewardService.getReward(editAchieveForAdminRequest.getRewardId().get());
                 messageText += "Награда за выполнения достижения изменена на: " + reward.getNameReward() + "\n";
             }
 
-        if (categoryId.isPresent())
-            if (categoryId.get()!=0) {
-                achievement.setCategoryOfAchieve(achieveService.getCategory(categoryId.get()));
-                Category category = achieveService.getCategory(categoryId.get());
+        if (editAchieveForAdminRequest.getCategoryId().isPresent())
+            if (editAchieveForAdminRequest.getCategoryId().get()!=0) {
+                achievement.setCategoryOfAchieve(achieveService.getCategory(editAchieveForAdminRequest.getCategoryId().get()));
+                Category category = achieveService.getCategory(editAchieveForAdminRequest.getCategoryId().get());
                 messageText += "Категория достижения изменена на: " + category.getNameCategory() + "\n";
             }
 
-        if (achieveDataFile.isPresent())
-            if (achieveDataFile.get().length<1) {
+        if (editAchieveForAdminRequest.getPhoto().isPresent())
+            if (editAchieveForAdminRequest.getPhoto().get().length<1) {
                 File file = achievement.getFileAchieve();
-                file.setDataFile(achieveDataFile.get());
+                file.setDataFile(editAchieveForAdminRequest.getPhoto().get());
                 fileService.resetFile(file);
             }
 
-        if (achieveFormatFile.isPresent()) {
-            if (!achieveFormatFile.get().equals("") && !achieveFormatFile.get().equals(achievement.getFileAchieve().getFormatFile())) {
+        if (editAchieveForAdminRequest.getFormat().isPresent()) {
+            if (!editAchieveForAdminRequest.getFormat().get().equals("") && !editAchieveForAdminRequest.getFormat().get().equals(achievement.getFileAchieve().getFormatFile())) {
                 File file = achievement.getFileAchieve();
-                file.setFormatFile(achieveFormatFile.get().toLowerCase());
-                messageText += "Тип файла изображения достижения изменен на: " + achieveFormatFile + "\n";
+                file.setFormatFile(editAchieveForAdminRequest.getFormat().get().toLowerCase());
+                messageText += "Тип файла изображения достижения изменен на: " + editAchieveForAdminRequest.getFormat() + "\n";
                 fileService.resetFile(file);
+            }
+        }
+
+        if (editAchieveForAdminRequest.getStatusActiveId().isPresent()) {
+            if (editAchieveForAdminRequest.getStatusActiveId().get()!=0) {
+                achievement.setStatusActiveOfAchieve(achieveService.getStatusActive(editAchieveForAdminRequest.getStatusActiveId().get()));
             }
         }
         helper.setText(messageText);
