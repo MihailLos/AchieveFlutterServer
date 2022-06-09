@@ -211,6 +211,10 @@ public class UserService {
         return moderatorRepository.findBy(type);
     }
 
+    public <T> List <T> getAllStatusActives(Class<T> type) {
+        return statusUserRepository.findBy(type);
+    }
+
     //Получаем список пользователей, чья фамилия содержит подстроку
     public <T> List <T> getUserBySubstring(String substring, Class<T> type) {
         return userRepository.findByLastNameContainingIgnoreCase(substring, type);
